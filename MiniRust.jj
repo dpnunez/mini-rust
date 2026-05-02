@@ -3,9 +3,8 @@ import java.io.*;
 
 public class MiniRust {
   public static void main(String args[]) throws ParseException,IOException {
-    
- 	MiniRust analisador = new MiniRust(new FileInputStream(args[0]));
- 	analisador.Rust();
+    MiniRust analisador = new MiniRust(new FileInputStream(args[0]));
+    analisador.Rust();
   }
 }
 
@@ -19,13 +18,13 @@ SKIP : {
 }
 
 TOKEN : {
-  <MAIN: "main">
-| <FN: "fn">  
-| <LET: "let">
-|<APAR: "(">
-|<FPAR: ")">  
-| <BEGIN: "{">
-| <END: "}">
+  <MAIN: "main"> |
+  <FN: "fn"> |
+  <LET: "let"> |
+  <APAR: "("> |
+  <FPAR: ")"> |
+  <BEGIN: "{"> |
+  <END: "}">
 }
 
 TOKEN : {
@@ -33,19 +32,19 @@ TOKEN : {
   <ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"])*>
 }
 
-void Rust () :
+void Rust():
 {Token t;}
 {
-(
-  <MAIN> { System.out.println("Palavra reservada: main");}
-  | <FN>   { System.out.println("Palavra reservada: fn");}
-  | <LET> { System.out.println("Palavra reservada: let" );}
-  | <BEGIN> { System.out.println("Abre chaves: {") ;}
-  | <FPAR> { System.out.println("Fecha parênteses: )");}
-  | <APAR> { System.out.println("Abre parênteses: (");}
-  | <END>  { System.out.println("Fecha chaves: }" );}  
-  | t=<NUM> { System.out.println("Número: "+ t.image);}
-  | t=<ID> { System.out.println("Identificador: "+ t.image);}
-)*
-<EOF> 
+  (
+    <MAIN> { System.out.println("Palavra reservada: main");} |
+    <FN>   { System.out.println("Palavra reservada: fn");} |
+    <LET> { System.out.println("Palavra reservada: let" );}
+    <BEGIN> { System.out.println("Abre chaves: {") ;} |
+    <FPAR> { System.out.println("Fecha parênteses: )");} |
+    <APAR> { System.out.println("Abre parênteses: (");} |
+    <END>  { System.out.println("Fecha chaves: }" );} |
+    t=<NUM> { System.out.println("Número: "+ t.image);} |
+    t=<ID> { System.out.println("Identificador: "+ t.image);}
+  )*
+  <EOF> 
 }
