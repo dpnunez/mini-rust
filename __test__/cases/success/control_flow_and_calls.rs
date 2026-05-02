@@ -1,13 +1,3 @@
-fn eh_maior (a : f32, b : f32) -> bool {
-  return (a > b);
-}
-
-fn atualiza (valor : f32) -> f32 {
-  let novo : f32;
-  novo = (valor + 1.0);
-  return novo;
-}
-
 fn main () {
   let n : f32;
   let limite : f32;
@@ -22,4 +12,14 @@ fn main () {
     n = atualiza(n);
     println! n;
   };
+}
+
+fn eh_maior (a : f32, b : f32) -> bool {
+  return (a > b);
+}
+
+fn atualiza (valor : f32) -> f32 {
+  let novo : f32;
+  novo = (valor + 1.0);
+  return novo;
 }

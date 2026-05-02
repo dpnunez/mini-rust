@@ -1,9 +1,3 @@
-fn soma (a : f32, b : f32) -> f32 {
-  let total : f32;
-  total = (a + b);
-  return total;
-}
-
 fn main () {
   let x : f32;
   let y : f32;
@@ -12,4 +6,10 @@ fn main () {
   y = 2.5;
   resultado = soma(x, y);
   println! resultado;
+}
+
+fn soma (a : f32, b : f32) -> f32 {
+  let total : f32;
+  total = (a + b);
+  return total;
 }
