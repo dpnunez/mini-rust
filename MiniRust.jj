@@ -64,7 +64,7 @@ TOKEN : {
   <END: "}">
 }
 
-/* Numeros */
+/* Numeros (somente num literal, sem separacao entre int/float/exp)*/
 TOKEN : {
   <NUM: (["0"-"9"])+ ("." (["0"-"9"])+)? ("E" (["+","-"])? (["0"-"9"])+)?>
 }
@@ -78,15 +78,48 @@ void Rust():
 {Token t;}
 {
   (
+    /* Palavras-chave */
+    <FN> { System.out.println("Palavra reservada: fn");} |
     <MAIN> { System.out.println("Palavra reservada: main");} |
-    <FN>   { System.out.println("Palavra reservada: fn");} |
-    <LET> { System.out.println("Palavra reservada: let" );}
-    <BEGIN> { System.out.println("Abre chaves: {") ;} |
-    <FPAR> { System.out.println("Fecha parênteses: )");} |
-    <APAR> { System.out.println("Abre parênteses: (");} |
-    <END>  { System.out.println("Fecha chaves: }" );} |
+    <LET> { System.out.println("Palavra reservada: let");} |
+    <IF> { System.out.println("Palavra reservada: if");} |
+    <WHILE> { System.out.println("Palavra reservada: while");} |
+    <RETURN> { System.out.println("Palavra reservada: return");} |
+    <PRINTLN> { System.out.println("Palavra reservada: println!");} |
+    <READ_FLOAT> { System.out.println("Palavra reservada: read_float");} |
+    <TRUE> { System.out.println("Palavra reservada: true");} |
+    <FALSE> { System.out.println("Palavra reservada: false");} |
+
+    /* Tipos */
+    <F32> { System.out.println("Tipo: f32");} |
+    <BOOL> { System.out.println("Tipo: bool");} |
+    <VOID> { System.out.println("Tipo: void");} |
+
+    /* Operadores */
+    <EQ> { System.out.println("Operador: ==");} |
+    <AND> { System.out.println("Operador: &&");} |
+    <OR> { System.out.println("Operador: ||");} |
+    <ARROW> { System.out.println("Operador: ->");} |
+    <ASSIGN> { System.out.println("Operador: =");} |
+    <PLUS> { System.out.println("Operador: +");} |
+    <MINUS> { System.out.println("Operador: -");} |
+    <MULT> { System.out.println("Operador: *");} |
+    <DIV> { System.out.println("Operador: /");} |
+    <LT> { System.out.println("Operador: <");} |
+    <GT> { System.out.println("Operador: >");} |
+
+    /* Delimitadores */
+    <SEMI> { System.out.println("Delimitador: ;");} |
+    <COLON> { System.out.println("Delimitador: :");} |
+    <COMMA> { System.out.println("Delimitador: ,");} |
+    <APAR> { System.out.println("Delimitador: (");} |
+    <FPAR> { System.out.println("Delimitador: )");} |
+    <BEGIN> { System.out.println("Delimitador: {");} |
+    <END> { System.out.println("Delimitador: }");} |
+
+    /* Literais e identificadores */
     t=<NUM> { System.out.println("Número: "+ t.image);} |
     t=<ID> { System.out.println("Identificador: "+ t.image);}
   )*
-  <EOF> 
+  <EOF>
 }
