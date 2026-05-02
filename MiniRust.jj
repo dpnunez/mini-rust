@@ -17,19 +17,61 @@ SKIP : {
 | "\r"
 }
 
+/* Palavras-chave */
 TOKEN : {
-  <MAIN: "main"> |
   <FN: "fn"> |
+  <MAIN: "main"> |
   <LET: "let"> |
+  <IF: "if"> |
+  <WHILE: "while"> |
+  <RETURN: "return"> |
+  <PRINTLN: "println!"> |
+  <READ_FLOAT: "read_float"> |
+  <TRUE: "true"> |
+  <FALSE: "false">
+}
+
+/* Tipos */
+TOKEN : {
+  <F32: "f32"> |
+  <BOOL: "bool"> |
+  <VOID: "void">
+}
+
+/* Operadores (compostos antes dos simples) */
+TOKEN : {
+  <EQ: "=="> |
+  <AND: "&&"> |
+  <OR: "||"> |
+  <ARROW: "->"> |
+  <ASSIGN: "="> |
+  <PLUS: "+"> |
+  <MINUS: "-"> |
+  <MULT: "*"> |
+  <DIV: "/"> |
+  <LT: "<"> |
+  <GT: ">">
+}
+
+/* Delimitadores e pontuação */
+TOKEN : {
+  <SEMI: ";"> |
+  <COLON: ":"> |
+  <COMMA: ","> |
   <APAR: "("> |
   <FPAR: ")"> |
   <BEGIN: "{"> |
   <END: "}">
 }
 
+/* Numeros */
 TOKEN : {
-  <NUM : (["0"-"9"])+> |
-  <ID: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"])*>
+  <NUM: (["0"-"9"])+ ("." (["0"-"9"])+)? ("E" (["+","-"])? (["0"-"9"])+)?>
+}
+
+/* Identificadores */
+TOKEN : {
+  <ID: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* ("_" (["a"-"z","A"-"Z","0"-"9"])+)*>
 }
 
 void Rust():
