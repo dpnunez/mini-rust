@@ -74,7 +74,9 @@ TOKEN : {
   <ID: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* ("_" (["a"-"z","A"-"Z","0"-"9"])+)*>
 }
 
-void Rust():
+
+// Para fins de debug da analise lexica, pode ser removido;
+void RustLexico():
 {Token t;}
 {
   (
@@ -122,4 +124,102 @@ void Rust():
     t=<ID> { System.out.println("Identificador: "+ t.image);}
   )*
   <EOF>
+}
+
+void Rust():
+{}
+{
+  Main() (Func())* <EOF>
+}
+
+void Main():
+{}
+{ 
+  <FN> <MAIN> <APAR> <FPAR> <BEGIN>
+    VarDecl()
+    SeqComandos()
+  <END>
+}
+
+void Tipo():
+{}
+{
+  <F32> | <BOOL> | <VOID>
+}
+
+void VarDecl():
+{}
+{
+  ( <LET> <ID> <COLON> Tipo() <SEMI> )*
+}
+
+void SeqComandos():
+{}
+{
+  ( Comando() )*
+}
+
+void Comando():
+{}
+{
+  <ID>
+  (
+      <ASSIGN> ( Exp() | <READ_FLOAT> <APAR> <FPAR> ) <SEMI>
+    | <APAR> ( ListaExp() )? <FPAR> <SEMI>
+  )
+|
+  <IF> Exp() <BEGIN> SeqComandos() <END> <SEMI>
+|
+  <WHILE> Exp() <BEGIN> SeqComandos() <END> <SEMI>
+|
+  <RETURN> Exp() <SEMI>
+|
+  <PRINTLN> Exp() <SEMI>
+}
+
+void Exp():
+{}
+{
+  <APAR> Exp() Op() Exp() <FPAR>
+|
+  Fator()
+}
+
+void Fator():
+{}
+{
+  <ID> ( <APAR> ( ListaExp() )? <FPAR> )?
+|
+  <NUM>
+|
+  <TRUE>
+|
+  <FALSE>
+}
+
+void Op():
+{}
+{
+  <PLUS> | <MINUS> | <MULT> | <DIV> | <AND> | <OR> | <LT> | <GT> | <EQ>
+}
+
+void ListaExp():
+{}
+{
+  Exp() ( <COMMA> Exp() )*
+}
+
+void Func():
+{}
+{
+  <FN> <ID> <APAR> ( ListaArg() )? <FPAR> <ARROW> Tipo() <BEGIN>
+    VarDecl()
+    SeqComandos()
+  <END>
+}
+
+void ListaArg():
+{}
+{
+  <ID> <COLON> Tipo() ( <COMMA> <ID> <COLON> Tipo() )*
 }
