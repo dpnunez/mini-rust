@@ -46,7 +46,7 @@ Esse script executa:
 ./scripts/run-example.sh
 ```
 
-Por padrão, ele roda o arquivo `__test__/examples/basic.rs`.
+Por padrão, ele roda o arquivo `__test__/cases/success/basic.rs`.
 
 Para executar outro arquivo de entrada:
 

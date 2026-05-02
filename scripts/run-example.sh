@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-EXAMPLE_FILE="${1:-$ROOT_DIR/__test__/examples/basic.rs}"
+EXAMPLE_FILE="${1:-$ROOT_DIR/__test__/cases/success/basic.rs}"
 
 if [ ! -f "$EXAMPLE_FILE" ]; then
   echo "Arquivo de exemplo nao encontrado: $EXAMPLE_FILE"
