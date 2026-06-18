@@ -25,6 +25,32 @@ FUNC -> FUNC "fn" TOKEN_id "(" LISTAARG? ")" "->" TIPO "{" VARDECL SEQCOMANDOS "
 LISTAARG -> TOKEN_id ":" TIPO | LISTAARG "," TOKEN_id ":" TIPO
 ```
 
+## Sintaxe adaptada para parser top-down em JavaCC
+
+A gramática abaixo é equivalente à sintaxe original do trabalho, mas remove
+recursões à esquerda e agrupa alternativas que começam com o mesmo símbolo.
+Essa forma é mais adequada para implementação em JavaCC.
+
+```text
+RUST -> MAIN FUNC*
+MAIN -> "fn" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
+VARDECL -> ("let" TOKEN_id ":" TIPO ";")*
+TIPO -> "f32" | "bool" | "void"
+SEQCOMANDOS -> COMANDO*
+COMANDO -> TOKEN_id ("=" (EXP | "read_float" "(" ")") ";" | "(" LISTAEXP? ")" ";")
+        | "if" EXP "{" SEQCOMANDOS "}" ";"
+        | "while" EXP "{" SEQCOMANDOS "}" ";"
+        | "return" EXP ";"
+        | "println!" EXP ";"
+EXP -> "(" EXP OP EXP ")" | FATOR
+FATOR -> TOKEN_id ("(" LISTAEXP? ")")?
+       | TOKEN_numliteral | "true" | "false"
+OP -> "+" | "-" | "*" | "/" | "&&" | "||" | "<" | ">" | "=="
+LISTAEXP -> EXP ("," EXP)*
+FUNC -> "fn" TOKEN_id "(" LISTAARG? ")" "->" TIPO "{" VARDECL SEQCOMANDOS "}"
+LISTAARG -> TOKEN_id ":" TIPO ("," TOKEN_id ":" TIPO)*
+```
+
 ## Convenções léxicas
 
 ```text
