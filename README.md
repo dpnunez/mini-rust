@@ -10,6 +10,7 @@ Este repositório implementa um analisador para uma linguagem simplificada inspi
 | --- | --- | --- |
 | 1 | Analisador Léxico | 14/05/2026 |
 | 2 | Analisador Sintático | 14/05/2026 |
+| 3 | Compilador para a linguagem MiniRust usando Javacc | 06/07/2026 |
 
 ## Requisitos
 
@@ -29,27 +30,28 @@ javacc -version
 
 ## Como rodar
 
-### 1) Gerar e compilar o parser
+### 1) No terminal, navegar ate a pasta que contém os arquivos e depois executar os comandos
 
 ```bash
-./scripts/build-parser.sh
+javacc MiniRust.jj
+javac *.java ast\*.java
 ```
 
-Esse script executa:
-
-- `javacc *.jj`
-- `javac *.java`
-
-### 2) Executar um exemplo
+### 2) Executar os testes
 
 ```bash
-./scripts/run-example.sh
+java MiniRust __test__\cases\success\NOME_ARQUIVO.rs
 ```
 
-Por padrão, ele roda o arquivo `__test__/cases/success/basic.rs`.
+Por padrão, os arquivos de teste estão na pasta  `__test__/cases/`.
 
-Para executar outro arquivo de entrada:
+Alguns exemplos de arquivos de entrada:
 
 ```bash
-./scripts/run-example.sh caminho/para/arquivo.rs
+java MiniRust __test__\cases\success\area_circulo.rs
+java MiniRust __test__\cases\success\analise_circuito.rs
+java MiniRust __test__\cases\success\teste_laco_for.rs
+
+java MiniRust __test__\cases\error\erro_laco_for_sem_to.rs
+java MiniRust __test__\cases\error\missing_semicolon.rs
 ```
