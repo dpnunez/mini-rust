@@ -1,13 +1,38 @@
 PARSER_BEGIN(MiniRust)
 import java.io.*;
+import java.util.ArrayList;
+import ast.*;
 
 public class MiniRust {
-  public static void main(String args[]) throws ParseException,IOException {
+  public static void main(String args[]) throws ParseException, IOException {
     MiniRust analisador = new MiniRust(new FileInputStream(args[0]));
-    analisador.Rust();
+    Prog arvore = analisador.Rust();
+    geraCodigo(arvore, args[0]);
+  }
+
+  public static void geraCodigo(Prog prog, String arquivo) {
+    try {
+      String codigoTraduzido = prog.toString();
+      
+      System.out.println("\nCodigo Gerado\n");
+      System.out.println(codigoTraduzido);
+      System.out.println("");
+      
+      FileWriter fw = new FileWriter("ProgramaGerado.java");
+      PrintWriter pw = new PrintWriter(fw);
+      
+      pw.print(codigoTraduzido);
+      
+      pw.close();
+      fw.close();
+      
+      System.out.println("\nArquivo ProgramaGerado.java foi criado com sucesso");
+      
+    } catch (IOException e) {
+      System.out.println("Erro ao gerar o arquivo de saida: " + e.getMessage());
+    }
   }
 }
-
 PARSER_END(MiniRust)
 
 SKIP : {
@@ -17,13 +42,14 @@ SKIP : {
 | "\r"
 }
 
-/* Palavras-chave */
 TOKEN : {
   <FN: "fn"> |
   <MAIN: "main"> |
   <LET: "let"> |
   <IF: "if"> |
   <WHILE: "while"> |
+  <FOR: "for"> |
+  <TO: "to"> |
   <RETURN: "return"> |
   <PRINTLN: "println!"> |
   <READ_FLOAT: "read_float"> |
@@ -31,14 +57,12 @@ TOKEN : {
   <FALSE: "false">
 }
 
-/* Tipos */
 TOKEN : {
   <F32: "f32"> |
   <BOOL: "bool"> |
   <VOID: "void">
 }
 
-/* Operadores (compostos antes dos simples) */
 TOKEN : {
   <EQ: "=="> |
   <AND: "&&"> |
@@ -53,7 +77,6 @@ TOKEN : {
   <GT: ">">
 }
 
-/* Delimitadores e pontuação */
 TOKEN : {
   <SEMI: ";"> |
   <COLON: ":"> |
@@ -64,40 +87,35 @@ TOKEN : {
   <END: "}">
 }
 
-/* Numeros (somente num literal, sem separacao entre int/float/exp)*/
 TOKEN : {
   <NUM: (["0"-"9"])+ ("." (["0"-"9"])+)? ("E" (["+","-"])? (["0"-"9"])+)?>
 }
 
-/* Identificadores */
 TOKEN : {
   <ID: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* ("_" (["a"-"z","A"-"Z","0"-"9"])+)*>
 }
 
-
-// Para fins de debug da analise lexica, pode ser removido;
 void RustLexico():
 {Token t;}
 {
   (
-    /* Palavras-chave */
     <FN> { System.out.println("Palavra reservada: fn");} |
     <MAIN> { System.out.println("Palavra reservada: main");} |
     <LET> { System.out.println("Palavra reservada: let");} |
     <IF> { System.out.println("Palavra reservada: if");} |
     <WHILE> { System.out.println("Palavra reservada: while");} |
+    <FOR> { System.out.println("Palavra reservada: for");} |
+    <TO> { System.out.println("Palavra reservada: to");} |
     <RETURN> { System.out.println("Palavra reservada: return");} |
     <PRINTLN> { System.out.println("Palavra reservada: println!");} |
     <READ_FLOAT> { System.out.println("Palavra reservada: read_float");} |
     <TRUE> { System.out.println("Palavra reservada: true");} |
     <FALSE> { System.out.println("Palavra reservada: false");} |
 
-    /* Tipos */
     <F32> { System.out.println("Tipo: f32");} |
     <BOOL> { System.out.println("Tipo: bool");} |
     <VOID> { System.out.println("Tipo: void");} |
 
-    /* Operadores */
     <EQ> { System.out.println("Operador: ==");} |
     <AND> { System.out.println("Operador: &&");} |
     <OR> { System.out.println("Operador: ||");} |
@@ -110,7 +128,6 @@ void RustLexico():
     <LT> { System.out.println("Operador: <");} |
     <GT> { System.out.println("Operador: >");} |
 
-    /* Delimitadores */
     <SEMI> { System.out.println("Delimitador: ;");} |
     <COLON> { System.out.println("Delimitador: :");} |
     <COMMA> { System.out.println("Delimitador: ,");} |
@@ -119,107 +136,189 @@ void RustLexico():
     <BEGIN> { System.out.println("Delimitador: {");} |
     <END> { System.out.println("Delimitador: }");} |
 
-    /* Literais e identificadores */
     t=<NUM> { System.out.println("Número: "+ t.image);} |
     t=<ID> { System.out.println("Identificador: "+ t.image);}
   )*
   <EOF>
 }
 
-void Rust():
-{}
+Prog Rust():
 {
-  Main() (Func())* <EOF>
+  Main mainNode;
+  ArrayList<Fun> funcoes = new ArrayList<Fun>();
+  Fun f;
+}
+{
+  mainNode=Main() 
+  ( f=Func() { funcoes.add(f); } )* 
+  <EOF>
+  { return new Prog(mainNode, funcoes); }
 }
 
-void Main():
-{}
+Main Main():
+{
+  ArrayList<VarDecl> vars;
+  ArrayList<Comando> coms;
+}
 { 
   <FN> <MAIN> <APAR> <FPAR> <BEGIN>
-    VarDecl()
-    SeqComandos()
+    vars=VarDecl()
+    coms=SeqComandos()
   <END>
+  { return new Main(vars, coms); }
 }
 
-void Tipo():
-{}
+String Tipo():
+{ Token t; }
 {
-  <F32> | <BOOL> | <VOID>
+  t=<F32> { return t.image; }
+| t=<BOOL> { return t.image; }
+| t=<VOID> { return t.image; }
 }
 
-void VarDecl():
-{}
+ArrayList<VarDecl> VarDecl():
 {
-  ( <LET> <ID> <COLON> Tipo() <SEMI> )*
+  ArrayList<VarDecl> vars = new ArrayList<VarDecl>();
+  Token id;
+  String t;
+}
+{
+  ( <LET> id=<ID> <COLON> t=Tipo() <SEMI> { vars.add(new VarDecl(t, id.image)); } )*
+  { return vars; }
 }
 
-void SeqComandos():
-{}
+ArrayList<Comando> SeqComandos():
 {
-  ( Comando() )*
+  ArrayList<Comando> coms = new ArrayList<Comando>();
+  Comando c;
+}
+{
+  ( c=Comando() { coms.add(c); } )*
+  { return coms; }
 }
 
-void Comando():
-{}
+Comando Comando():
 {
-  <ID>
+  Token id;
+  Token t;
+  Exp e;
+  Exp e2 = null;
+  ArrayList<Exp> args = new ArrayList<Exp>();
+  ArrayList<Comando> bloco;
+  Comando result = null;
+}
+{
+  id=<ID>
   (
-      <ASSIGN> ( Exp() | <READ_FLOAT> <APAR> <FPAR> ) <SEMI>
-    | <APAR> ( ListaExp() )? <FPAR> <SEMI>
+      <ASSIGN> 
+      ( 
+          e=Exp() { result = new CAtribuicao(id.beginLine, id.image, e); } 
+        | <READ_FLOAT> <APAR> <FPAR> { result = new CReadInput(id.beginLine, id.image); } 
+      ) <SEMI>
+    | <APAR> ( args=ListaExp() )? <FPAR> <SEMI> { result = new CChamadaFun(id.beginLine, id.image, args); }
   )
+  { return result; }
 |
-  <IF> Exp() <BEGIN> SeqComandos() <END> <SEMI>
+  t=<IF> e=Exp() <BEGIN> bloco=SeqComandos() <END> <SEMI>
+  { return new CIf(t.beginLine, e, bloco); }
 |
-  <WHILE> Exp() <BEGIN> SeqComandos() <END> <SEMI>
+  t=<WHILE> e=Exp() <BEGIN> bloco=SeqComandos() <END> <SEMI>
+  { return new CWhile(t.beginLine, e, bloco); }
 |
-  <RETURN> Exp() <SEMI>
+  t=<FOR> id=<ID> <ASSIGN> e=Exp() <TO> e2=Exp() <BEGIN> bloco=SeqComandos() <END> <SEMI>
+  { return new CFor(t.beginLine, id.image, e, e2, bloco); }
 |
-  <PRINTLN> Exp() <SEMI>
+  t=<RETURN> e=Exp() <SEMI>
+  { return new CReturn(t.beginLine, e); }
+|
+  t=<PRINTLN> e=Exp() <SEMI>
+  { return new CPrint(t.beginLine, e); }
 }
 
-void Exp():
-{}
+Exp Exp():
 {
-  <APAR> Exp() Op() Exp() <FPAR>
+  Exp e1, e2;
+  String op;
+}
+{
+  <APAR> e1=Exp() op=Op() e2=Exp() <FPAR>
+  { return new EOpExp(op, e1, e2); }
 |
-  Fator()
+  e1=Fator() 
+  { return e1; }
 }
 
-void Fator():
-{}
+Exp Fator():
 {
-  <ID> ( <APAR> ( ListaExp() )? <FPAR> )?
+  Token t;
+  ArrayList<Exp> args = new ArrayList<Exp>();
+  Exp result;
+}
+{
+  t=<ID> 
+  ( 
+      <APAR> ( args=ListaExp() )? <FPAR> { result = new EChamadaFun(t.image, args); }
+    | 
+      { result = new EVar(t.image); }
+  )
+  { return result; }
 |
-  <NUM>
+  t=<NUM> { return new EFloat(Float.parseFloat(t.image)); }
 |
-  <TRUE>
+  <TRUE> { return new ETrue(); }
 |
-  <FALSE>
+  <FALSE> { return new EFalse(); }
 }
 
-void Op():
-{}
+String Op():
+{ Token t; }
 {
-  <PLUS> | <MINUS> | <MULT> | <DIV> | <AND> | <OR> | <LT> | <GT> | <EQ>
+  t=<PLUS> { return t.image; } 
+| t=<MINUS> { return t.image; } 
+| t=<MULT> { return t.image; } 
+| t=<DIV> { return t.image; } 
+| t=<AND> { return t.image; } 
+| t=<OR> { return t.image; } 
+| t=<LT> { return t.image; } 
+| t=<GT> { return t.image; } 
+| t=<EQ> { return t.image; }
 }
 
-void ListaExp():
-{}
+ArrayList<Exp> ListaExp():
 {
-  Exp() ( <COMMA> Exp() )*
+  ArrayList<Exp> args = new ArrayList<Exp>();
+  Exp e;
+}
+{
+  e=Exp() { args.add(e); } 
+  ( <COMMA> e=Exp() { args.add(e); } )*
+  { return args; }
 }
 
-void Func():
-{}
+Fun Func():
 {
-  <FN> <ID> <APAR> ( ListaArg() )? <FPAR> <ARROW> Tipo() <BEGIN>
-    VarDecl()
-    SeqComandos()
+  Token id;
+  ArrayList<ParamFormalFun> params = new ArrayList<ParamFormalFun>();
+  String t;
+  ArrayList<VarDecl> vars;
+  ArrayList<Comando> coms;
+}
+{
+  <FN> id=<ID> <APAR> ( params=ListaArg() )? <FPAR> <ARROW> t=Tipo() <BEGIN>
+    vars=VarDecl()
+    coms=SeqComandos()
   <END>
+  { return new Fun(id.image, params, t, vars, coms); }
 }
 
-void ListaArg():
-{}
+ArrayList<ParamFormalFun> ListaArg():
 {
-  <ID> <COLON> Tipo() ( <COMMA> <ID> <COLON> Tipo() )*
+  ArrayList<ParamFormalFun> params = new ArrayList<ParamFormalFun>();
+  Token id;
+  String t;
+}
+{
+  id=<ID> <COLON> t=Tipo() { params.add(new ParamFormalFun(id.image, t)); } 
+  ( <COMMA> id=<ID> <COLON> t=Tipo() { params.add(new ParamFormalFun(id.image, t)); } )*
+  { return params; }
 }
