@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 javacc *.jj
-javac *.java
+javac *.java ast/*.java

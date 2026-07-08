@@ -9,7 +9,7 @@ if [ ! -f "$EXAMPLE_FILE" ]; then
   exit 1
 fi
 
-printf "\n Recompilando o parser...\n\n\n"
-"$ROOT_DIR/scripts/build-parser.sh"
+printf "\n building compiler...\n\n\n"
+"$ROOT_DIR/scripts/build-compiler.sh"
 printf "\n\n\n Executando o parser para o arquivo: %s \n\n\n" "$EXAMPLE_FILE"
 java -cp "$ROOT_DIR" MiniRust "$EXAMPLE_FILE"
